@@ -1,0 +1,5 @@
+flask
+selenium
+webdriver-manager
+deep-translator
+pandas
