@@ -86,7 +86,7 @@ body {
   padding: 30px 20px;
 }
 
-/* ── RESUMEN CARDS ── */
+
 .resumen {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -185,7 +185,6 @@ body {
   background: var(--border);
 }
 
-/* ── GRÁFICOS CONTAINER (NUEVO PARA LOS 3 GRÁFICOS) ── */
 .graficos-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -339,4 +338,39 @@ body {
 @media (max-width: 768px) {
   .oferta { flex-direction: column; }
   .oferta-riesgo-panel { align-items: flex-start; flex-direction: row; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;}
+}
+
+/* --- CORRECCIÓN DEL PANEL DE RIESGO --- */
+.oferta-riesgo-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    border-radius: 8px;
+    min-width: 110px;
+    height: max-content; 
+    align-self: flex-start; 
+    text-align: center;
+}
+
+.oferta-riesgo-panel .etiqueta {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.oferta-riesgo-panel .puntaje {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.oferta-riesgo-panel .puntaje-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
 }

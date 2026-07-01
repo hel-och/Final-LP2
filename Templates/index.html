@@ -45,7 +45,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="filtros">
     <div class="filtro-busqueda">
       <label>Buscar</label>
       <input type="text" id="filtroBusqueda" placeholder="Título o empresa..." oninput="mostrarEmpleos()">
@@ -86,9 +86,19 @@
     </div>
   </section>
 
-  <section class="grafico">
-    <h2>Distribución del riesgo</h2>
-    <canvas id="graficoRiesgo"></canvas>
+  <section class="graficos-container">
+    <div class="grafico">
+      <h2>1. Distribución del Riesgo</h2>
+      <canvas id="graficoRiesgo"></canvas>
+    </div>
+    <div class="grafico">
+      <h2>2. Fuentes de Empleo</h2>
+      <canvas id="graficoFuentes"></canvas>
+    </div>
+    <div class="grafico">
+      <h2>3. Categorías Principales</h2>
+      <canvas id="graficoCategorias"></canvas>
+    </div>
   </section>
 
   <div id="mensaje">Cargando datos...</div>
