@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detector de ofertas fraudulentas</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-content">
+    <div class="icon-box">🛡️</div>
+    <div class="hero-text">
+      <h1>Detector de ofertas laborales fraudulentas</h1>
+      <p>Web scraping + análisis de riesgo en tiempo real desde Dynamite Jobs</p>
+      <span>regex · scoring · procesamiento de texto</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="resumen">
+    <div class="card azul">
+      <h3>Total analizadas</h3>
+      <strong id="total">0</strong>
+      <p>Ofertas encontradas</p>
+    </div>
+    <div class="card rojo">
+      <h3>Riesgo alto</h3>
+      <strong id="alto">0</strong>
+      <p>Requieren atención</p>
+    </div>
+    <div class="card naranja">
+      <h3>Riesgo medio</h3>
+      <strong id="medio">0</strong>
+      <p>Posible riesgo</p>
+    </div>
+    <div class="card verde">
+      <h3>Riesgo bajo</h3>
+      <strong id="bajo">0</strong>
+      <p>Mayormente seguras</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="filtro-busqueda">
+      <label>Buscar</label>
+      <input type="text" id="filtroBusqueda" placeholder="Título o empresa..." oninput="mostrarEmpleos()">
+    </div>
+    <div>
+      <label>Fuente</label>
+      <select id="filtroFuente" onchange="mostrarEmpleos()">
+        <option value="Todas">Todas</option>
+      </select>
+    </div>
+    <div>
+      <label>Categoría</label>
+      <select id="filtroCategoria" onchange="mostrarEmpleos()">
+        <option value="Todas">Todas</option>
+      </select>
+    </div>
+    <div>
+      <label>Nivel de riesgo</label>
+      <select id="filtroRiesgo" onchange="mostrarEmpleos()">
+        <option value="Todos">Todos</option>
+        <option value="Alto">Alto</option>
+        <option value="Medio">Medio</option>
+        <option value="Bajo">Bajo</option>
+      </select>
+    </div>
+    <div>
+      <label>Ordenar por</label>
+      <select id="filtroOrden" onchange="mostrarEmpleos()">
+        <option value="default">Por defecto</option>
+        <option value="riesgo_desc">Mayor riesgo primero</option>
+        <option value="riesgo_asc">Menor riesgo primero</option>
+        <option value="titulo_asc">Título A → Z</option>
+        <option value="titulo_desc">Título Z → A</option>
+      </select>
+    </div>
+    <div class="filtro-reset">
+      <button onclick="resetFiltros()">↺ Limpiar filtros</button>
+    </div>
+  </section>
+
+  <section class="grafico">
+    <h2>Distribución del riesgo</h2>
+    <canvas id="graficoRiesgo"></canvas>
+  </section>
+
+  <div id="mensaje">Cargando datos...</div>
+
+  <section id="contenedor"></section>
+
+</main>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
