@@ -1,8 +1,7 @@
 let empleos = [];
-
-let graficoRiesgo = null;
-let graficoFuentes = null;
-let graficoCategorias = null;
+let chartRiesgo = null;
+let chartFuentes = null;
+let chartCategorias = null;
 
 window.onload = async function () {
   const response = await fetch("/datos");
@@ -14,7 +13,7 @@ window.onload = async function () {
   }
 
   cargarFiltros();
-  document.getElementById("mensaje").innerText = "Datos cargados correctamente.";
+  document.getElementById("mensaje").style.display = "none";
   mostrarEmpleos();
 };
 
@@ -44,118 +43,104 @@ function mostrarEmpleos() {
 
   let filtrados = empleos;
 
-  if (fuente    !== "Todas")  filtrados = filtrados.filter(e => e.fuente === fuente);
-  if (categoria !== "Todas")  filtrados = filtrados.filter(e => e.categoria === categoria);
-  if (riesgo    !== "Todos")  filtrados = filtrados.filter(e => e.nivel_riesgo === riesgo);
-  if (busqueda)               filtrados = filtrados.filter(e =>
-    e.titulo.toLowerCase().includes(busqueda) ||
-    e.empresa.toLowerCase().includes(busqueda)
-  );
+  if (fuente !== "Todas") filtrados = filtrados.filter(e => e.fuente === fuente);
+  if (categoria !== "Todas") filtrados = filtrados.filter(e => e.categoria === categoria);
+  if (riesgo !== "Todos") filtrados = filtrados.filter(e => e.nivel_riesgo === riesgo);
 
-  if (orden === "riesgo_desc") filtrados = [...filtrados].sort((a, b) => b.riesgo - a.riesgo);
-  if (orden === "riesgo_asc")  filtrados = [...filtrados].sort((a, b) => a.riesgo - b.riesgo);
-  if (orden === "titulo_asc")  filtrados = [...filtrados].sort((a, b) => a.titulo.localeCompare(b.titulo));
-  if (orden === "titulo_desc") filtrados = [...filtrados].sort((a, b) => b.titulo.localeCompare(a.titulo));
+  if (busqueda) {
+    filtrados = filtrados.filter(e =>
+      e.titulo.toLowerCase().includes(busqueda) ||
+      e.empresa.toLowerCase().includes(busqueda)
+    );
+  }
 
-  actualizarMetricas(filtrados);
-  actualizarGrafico(filtrados);
+  if (orden === "riesgo_desc") filtrados.sort((a, b) => b.riesgo - a.riesgo);
+  if (orden === "riesgo_asc")  filtrados.sort((a, b) => a.riesgo - b.riesgo);
+  if (orden === "titulo_asc")  filtrados.sort((a, b) => a.titulo.localeCompare(b.titulo));
+  if (orden === "titulo_desc") filtrados.sort((a, b) => b.titulo.localeCompare(a.titulo));
+
+  actualizarResumen(filtrados);
+  actualizarGraficos(filtrados);
   renderizarOfertas(filtrados);
 }
 
 function resetFiltros() {
   document.getElementById("filtroBusqueda").value = "";
-  document.getElementById("filtroFuente").value   = "Todas";
+  document.getElementById("filtroFuente").value = "Todas";
   document.getElementById("filtroCategoria").value = "Todas";
-  document.getElementById("filtroRiesgo").value   = "Todos";
-  document.getElementById("filtroOrden").value    = "default";
+  document.getElementById("filtroRiesgo").value = "Todos";
+  document.getElementById("filtroOrden").value = "default";
   mostrarEmpleos();
 }
 
-function actualizarMetricas(datos) {
-  document.getElementById("total").innerText  = datos.length;
-  document.getElementById("alto").innerText   = datos.filter(e => e.nivel_riesgo === "Alto").length;
-  document.getElementById("medio").innerText  = datos.filter(e => e.nivel_riesgo === "Medio").length;
-  document.getElementById("bajo").innerText   = datos.filter(e => e.nivel_riesgo === "Bajo").length;
+function actualizarResumen(datos) {
+  document.getElementById("total").innerText = datos.length;
+  document.getElementById("alto").innerText = datos.filter(e => e.nivel_riesgo === "Alto").length;
+  document.getElementById("medio").innerText = datos.filter(e => e.nivel_riesgo === "Medio").length;
+  document.getElementById("bajo").innerText = datos.filter(e => e.nivel_riesgo === "Bajo").length;
 }
 
-function actualizarGrafico(datos) {
+function actualizarGraficos(datos) {
+  // Limpiar gráficos anteriores si existen
+  if (chartRiesgo) chartRiesgo.destroy();
+  if (chartFuentes) chartFuentes.destroy();
+  if (chartCategorias) chartCategorias.destroy();
 
-  if (graficoRiesgo) graficoRiesgo.destroy();
-  if (graficoFuentes) graficoFuentes.destroy();
-  if (graficoCategorias) graficoCategorias.destroy();
+  // 1. Gráfico de Riesgo (Barras)
+  const ctxRiesgo = document.getElementById("graficoRiesgo").getContext("2d");
+  const altos = datos.filter(e => e.nivel_riesgo === "Alto").length;
+  const medios = datos.filter(e => e.nivel_riesgo === "Medio").length;
+  const bajos = datos.filter(e => e.nivel_riesgo === "Bajo").length;
 
-  // --- GRÁFICO 1: BARRAS (Riesgo) ---
-  const alto  = datos.filter(e => e.nivel_riesgo === "Alto").length;
-  const medio = datos.filter(e => e.nivel_riesgo === "Medio").length;
-  const bajo  = datos.filter(e => e.nivel_riesgo === "Bajo").length;
+  chartRiesgo = new Chart(ctxRiesgo, {
+    type: 'bar',
+    data: {
+      labels: ['Alto', 'Medio', 'Bajo'],
+      datasets: [{
+        label: 'Cantidad de ofertas',
+        data: [altos, medios, bajos],
+        backgroundColor: ['#f85149', '#d29922', '#3fb950'] // Colores Github Dark
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
 
-  const ctxRiesgo = document.getElementById("graficoRiesgo");
-  if (ctxRiesgo) {
-    graficoRiesgo = new Chart(ctxRiesgo, {
-      type: "bar",
-      data: {
-        labels: ["Alto", "Medio", "Bajo"],
-        datasets: [{
-          label: "Ofertas",
-          data: [alto, medio, bajo],
-          backgroundColor: ["rgba(248,81,73,0.7)", "rgba(210,153,34,0.7)", "rgba(63,185,80,0.7)"],
-          borderColor:     ["#f85149", "#d29922", "#3fb950"],
-          borderWidth: 1,
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { color: "#30363d" }, ticks: { color: "#7d8590" } },
-          y: { grid: { color: "#30363d" }, ticks: { color: "#7d8590", precision: 0 }, beginAtZero: true }
-        }
-      }
-    });
-  }
+  // 2. Gráfico de Fuentes (Doughnut / Dona)
+  const ctxFuentes = document.getElementById("graficoFuentes").getContext("2d");
+  const fuentesCount = {};
+  datos.forEach(e => fuentesCount[e.fuente] = (fuentesCount[e.fuente] || 0) + 1);
+  
+  chartFuentes = new Chart(ctxFuentes, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(fuentesCount),
+      datasets: [{
+        data: Object.values(fuentesCount),
+        backgroundColor: ['#58a6ff', '#8957e5', '#3fb950', '#d29922']
+      }]
+    },
+    options: { responsive: true }
+  });
 
-  // --- GRÁFICO 2: DONA (Fuentes) ---
-  const conteoFuentes = {};
-  datos.forEach(e => { conteoFuentes[e.fuente] = (conteoFuentes[e.fuente] || 0) + 1; });
+  // 3. Gráfico de Categorías (Pie / Circular)
+  const ctxCategorias = document.getElementById("graficoCategorias").getContext("2d");
+  const catCount = {};
+  datos.forEach(e => catCount[e.categoria] = (catCount[e.categoria] || 0) + 1);
 
-  const ctxFuentes = document.getElementById("graficoFuentes");
-  if (ctxFuentes) {
-    graficoFuentes = new Chart(ctxFuentes, {
-      type: "doughnut",
-      data: {
-        labels: Object.keys(conteoFuentes),
-        datasets: [{
-          data: Object.values(conteoFuentes),
-          backgroundColor: ["#58a6ff", "#8957e5"],
-          borderColor: "#0d1117",
-          borderWidth: 2
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: "#e6edf3" } } } }
-    });
-  }
-
-  // --- GRÁFICO 3: PASTEL (Categorías) ---
-  const conteoCategorias = {};
-  datos.forEach(e => { conteoCategorias[e.categoria] = (conteoCategorias[e.categoria] || 0) + 1; });
-
-  const ctxCategorias = document.getElementById("graficoCategorias");
-  if (ctxCategorias) {
-    graficoCategorias = new Chart(ctxCategorias, {
-      type: "pie",
-      data: {
-        labels: Object.keys(conteoCategorias),
-        datasets: [{
-          data: Object.values(conteoCategorias),
-          backgroundColor: ["#f78166", "#e3b341", "#238636", "#58a6ff"],
-          borderColor: "#0d1117",
-          borderWidth: 2
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: "#e6edf3" } } } }
-    });
-  }
+  chartCategorias = new Chart(ctxCategorias, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(catCount),
+      datasets: [{
+        data: Object.values(catCount),
+        backgroundColor: ['#1f6feb', '#238636', '#a371f7', '#da3633', '#9e6a03']
+      }]
+    },
+    options: { responsive: true }
+  });
 }
 
 function renderizarOfertas(datos) {
@@ -185,12 +170,11 @@ function renderizarOfertas(datos) {
         <a class="oferta-link" href="${e.url}" target="_blank">Ver oferta original →</a>
       </div>
       <div class="oferta-riesgo-panel riesgo-${e.nivel_riesgo}">
-        <span class="etiqueta riesgo-${e.nivel_riesgo}">${e.nivel_riesgo}</span>
-        <span class="puntaje">${e.riesgo}</span>
-        <span class="puntaje-label">puntos</span>
+        <div class="etiqueta">Riesgo ${e.nivel_riesgo}</div>
+        <div class="puntaje">${e.riesgo}</div>
+        <div class="puntaje-label">PUNTOS</div>
       </div>
     `;
-
     contenedor.appendChild(div);
   });
 }
